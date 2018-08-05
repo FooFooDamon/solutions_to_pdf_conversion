@@ -1,12 +1,13 @@
 #!/bin/bash
 
 INDEX_URL=http://www.67shu.com/63/63663
+RESULT_DIR=$(dirname $0)/$(basename $0 .sh)
 
-mkdir -p zhenxiebiji zhenxiebiji_utf8
+mkdir -p $RESULT_DIR/zhenxiebiji $RESULT_DIR/zhenxiebiji_utf8
 
-[ -f zhenxiebiji_index.html ] || curl $INDEX_URL/ > zhenxiebiji_index.html
+[ -f $RESULT_DIR/zhenxiebiji_index.html ] || curl $INDEX_URL/ > $RESULT_DIR/zhenxiebiji_index.html
 
-[ `ls zhenxiebiji/ | wc -l` -gt 0 ] || iconv -c -f gbk -t utf8 zhenxiebiji_index.html \
+[ `ls $RESULT_DIR/zhenxiebiji/ | wc -l` -gt 0 ] || iconv -c -f gbk -t utf8 $RESULT_DIR/zhenxiebiji_index.html \
 	| sed "/<dd>/s//\n<dd>/g" \
 	| grep "<dd>" \
 	| grep -v "<dd><\/dd>" \
@@ -15,21 +16,21 @@ mkdir -p zhenxiebiji zhenxiebiji_utf8
 	do
 		[ `echo $i | grep -c "http"` -gt 0 ] || i="$INDEX_URL/$i"
 		echo "Downloading $i ..."
-		curl $i > zhenxiebiji/$(basename $i)
+		curl $i > $RESULT_DIR/zhenxiebiji/$(basename $i)
 	done
 
-[ `ls zhenxiebiji_utf8/ | wc -l` -gt 0 ] || for i in zhenxiebiji/*
+[ `ls $RESULT_DIR/zhenxiebiji_utf8/ | wc -l` -gt 0 ] || for i in $RESULT_DIR/zhenxiebiji/*
 do
 	iconv -c -f gbk -t utf8 $i \
 		| sed "/charset=gbk/s//charset=utf-8/g" \
-		> zhenxiebiji_utf8/$(basename $i)
+		> $RESULT_DIR/zhenxiebiji_utf8/$(basename $i)
 done
 
-for i in zhenxiebiji/*
+for i in $RESULT_DIR/zhenxiebiji/*
 do
-	wkhtmltopdf --no-images --disable-javascript --disable-local-file-access --disable-plugins --minimum-font-size 40 "$i" "$i".pdf
+	wkhtmltopdf --no-images --disable-javascript --disable-local-file-access --disable-plugins --minimum-font-size 30 --lowquality "$i" "$i".pdf
 	echo "$i pdf conversion finished"
 done
 
-pdftk zhenxiebiji/*.pdf output zhenxiebiji.pdf
+pdftk $RESULT_DIR/zhenxiebiji/*.pdf output $RESULT_DIR/zhenxiebiji.pdf
 
